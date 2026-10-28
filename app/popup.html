@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Social Media Bell</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Social Media Bell</h1>
+    <label class="switch" title="Turn Social Media Bell on or off">
+      <input id="enabled" type="checkbox"><span class="track"></span><span class="sr">Check for new notifications</span>
+    </label>
+  </header>
+
+  <div id="banners"></div>
+
+  <main>
+    <ul id="siteList" class="sites"></ul>
+    <p class="muted status" id="statusLine"></p>
+    <div class="row">
+      <button class="btn" id="checkNow">Check now</button>
+      <button class="btn" id="testAlert" title="Shows a sample alert so you can see what it looks like and allow notifications">Send a test alert</button>
+    </div>
+
+    <h2>Sites</h2>
+    <p class="muted small">X and Reddit are checked in the background; no tab needed. The others are read from the unread count in their tab title, so keep a tab open for each (pinning it works well).</p>
+    <div id="siteToggles" class="toggles"></div>
+    <form id="addForm" class="row add">
+      <input id="addDomain" placeholder="Add another site, e.g. mastodon.social" autocomplete="off">
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <p class="muted small" id="addNote" hidden></p>
+
+    <h2>Options</h2>
+    <label class="check"><input id="notifyMessages" type="checkbox"><span>Alert me about new X direct messages too</span></label>
+    <label class="check"><input id="showBadge" type="checkbox"><span>Show the unread total on the toolbar icon</span></label>
+    <label class="field">Check X and Reddit every
+      <select id="intervalMin"></select>
+    </label>
+
+    <details id="settings">
+      <summary>Settings</summary>
+      <p class="muted">Social Media Bell uses this browser's existing sign-ins. For X and Reddit it asks for the same unread count their websites show; for the other sites it only reads the open tab's title. Nothing is sent anywhere else.</p>
+      <p class="muted">No alerts showing up? Allow notifications for your browser in System Settings → Notifications, and check Focus modes.</p>
+
+      <h3>Updates</h3>
+      <p class="muted" id="versionLine"></p>
+      <button class="btn" id="checkUpdates">Check for Updates…</button>
+      <div id="updateResult"></div>
+      <label class="field">Update source <span class="muted">(leave empty for the built-in GitHub feed)</span>
+        <input id="updateSource" type="url" placeholder="https://…/latest.json">
+      </label>
+      <p><a id="ghLink" target="_blank">Social Media Bell on GitHub</a> · <a id="errLink" target="_blank">Error code list</a></p>
+    </details>
+  </main>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

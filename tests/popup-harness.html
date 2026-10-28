@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Popup harness</title>
+<link rel="stylesheet" href="../app/popup.css">
+</head>
+<body>
+<!-- Loads app/popup.html's body with mocked chrome.* APIs and made-up counts.
+     ?err shows SB-202 on X, ?rl Reddit rate-limited, ?off turned off, ?new nothing checked yet. -->
+<script>
+  const q = new URLSearchParams(location.search);
+  const now = Date.now();
+  const store = { settings: { enabled: !q.has("off"), off: ["instagram"], custom: ["mastodon.social"] } };
+  if (!q.has("new")) {
+    store.counts = { x: { n: 3, dm: 1, t: now }, reddit: { n: 0, t: now }, facebook: { n: 5, t: now }, linkedin: { n: 0, t: now } };
+    store.status = {
+      x: { state: "ok", checkedAt: now - 40e3 },
+      reddit: { state: "signedOut", checkedAt: now - 40e3 },
+      facebook: { state: "ok", checkedAt: now, tabs: 1 },
+      linkedin: { state: "ok", checkedAt: now, tabs: 2 },
+      threads: { state: "noTab", checkedAt: now },
+      bluesky: { state: "noTab", checkedAt: now },
+      "custom:mastodon.social": { state: "noTab", checkedAt: now },
+    };
+  }
+  if (q.has("err")) store.status.x = { state: "error", checkedAt: now - 20e3, error: { code: "SB-202", details: "HTTP 403", t: now - 20e3 } };
+  if (q.has("rl")) {
+    store.status.reddit = { state: "error", checkedAt: now, error: { code: "SB-405", details: "HTTP 429", t: now } };
+    store.waitUntil = { reddit: now + 9 * 60e3 };
+  }
+  const pick = (src, k) => k == null ? { ...src } : Object.fromEntries([].concat(k).filter((x) => x in src).map((x) => [x, src[x]]));
+  window.sent = [];
+  window.chrome = {
+    storage: {
+      local: { get: async (k) => pick(store, k), set: async (o) => Object.assign(store, o), remove: async (k) => [].concat(k).forEach((x) => delete store[x]) },
+      onChanged: { addListener() {} },
+    },
+    permissions: { request: async () => !q.has("deny"), remove: async () => true },
+    runtime: {
+      getManifest: () => ({ version: "1.0.0" }),
+      sendMessage: async (m) => {
+        sent.push(m);
+        if (m.type === "checkUpdates") return { checkedAt: now, current: "1.0.0", latest: "1.0.0", available: false };
+        if (m.type === "checkNow") { store.counts.x = { n: 4, dm: 1, t: Date.now() }; store.status.x = { state: "ok", checkedAt: Date.now() }; }
+        return null;
+      },
+    },
+  };
+  (async () => {
+    const html = await (await fetch("../app/popup.html")).text();
+    const body = new DOMParser().parseFromString(html, "text/html").body;
+    for (const s of body.querySelectorAll("script")) s.remove();
+    document.body.append(...body.childNodes);
+    await import("../app/popup.js");
+  })();
+</script>
+</body>
+</html>
