@@ -79,8 +79,11 @@ function renderBanners(store, sites) {
       box.append(errorBanner(st.error, null, `${s.name}: `));
     }
   }
+  // A logged site error ("X: ...") is over once that site has checked fine since.
+  const recovered = (e) => sites.some((s) => e.details?.startsWith(`${s.name}: `)
+    && store.status?.[s.id]?.state !== "error" && store.status?.[s.id]?.checkedAt > e.t);
   const seen = settings.errorsSeenAt || 0;
-  for (const err of (store.errors || []).filter((e) => e.t > seen && !current.has(e.code) && !passing(e.code)).slice(-2).reverse()) {
+  for (const err of (store.errors || []).filter((e) => e.t > seen && !current.has(e.code) && !passing(e.code) && !recovered(e)).slice(-2).reverse()) {
     box.append(errorBanner(err, () => save({ errorsSeenAt: err.t })));
   }
   if (store.update && store.update.available) box.prepend(updateBanner(store.update));

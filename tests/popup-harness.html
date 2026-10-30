@@ -7,7 +7,8 @@
 </head>
 <body>
 <!-- Loads app/popup.html's body with mocked chrome.* APIs and made-up counts.
-     ?err shows SB-202 on X, ?rl Reddit rate-limited, ?off turned off, ?new nothing checked yet. -->
+     ?err shows SB-202 on X, ?rl Reddit rate-limited, ?off turned off, ?new nothing checked yet,
+     ?past an SB-203 logged earlier that X has checked fine since (no banner), ?pastnow the same still failing (banner). -->
 <script>
   const q = new URLSearchParams(location.search);
   const now = Date.now();
@@ -25,6 +26,10 @@
     };
   }
   if (q.has("err")) store.status.x = { state: "error", checkedAt: now - 20e3, error: { code: "SB-202", details: "HTTP 403", t: now - 20e3 } };
+  if (q.has("past") || q.has("pastnow")) {
+    store.errors = [{ code: "SB-203", details: "X: Error: in tab: TypeError: Failed to fetch", t: now - 85 * 60e3 }];
+    if (q.has("pastnow")) store.status.x.checkedAt = now - 90 * 60e3;
+  }
   if (q.has("rl")) {
     store.status.reddit = { state: "error", checkedAt: now, error: { code: "SB-405", details: "HTTP 429", t: now } };
     store.waitUntil = { reddit: now + 9 * 60e3 };

@@ -1,1 +1,1 @@
-First release: desktop alerts and a toolbar count for new notifications on X, Reddit, Facebook, Instagram, LinkedIn, Threads, Bluesky and any site you add.
+Fix: an old error (like a brief connection drop) no longer stays on screen after the site starts checking fine again.
